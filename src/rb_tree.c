@@ -1,6 +1,5 @@
 
 #include <stdlib.h>
-#include <string.h>
 #include "rb_tree.h"
 
 /* Correct root pointer. */
@@ -106,19 +105,23 @@ void rb_insert_case5(struct rb_tree_node *n)
     rb_rotate_left(g);
 }
 
-struct rb_tree *rb_create()
+struct rb_tree *rb_create(int (*compare)(const void*, const void*))
 {
-  return calloc(1, sizeof(struct rb_tree));
+  struct rb_tree *t = calloc(1, sizeof(struct rb_tree));
+  if (t) {
+    t->compare = compare;
+  }
+  return t;
 }
 
-struct rb_tree_node *rb_insert(struct rb_tree *t, char *key)
+struct rb_tree_node *rb_insert(struct rb_tree *t, void *key)
 {
   struct rb_tree_node *n = t->root;
   if (n) {
     int cmp;
     struct rb_tree_node *c;
     while (n->key) {
-      cmp = strcmp(n->key, key);
+      cmp = t->compare(n->key, key);
       if (cmp > 0) {
         c = n->left;
         if (!c) {
@@ -151,12 +154,12 @@ struct rb_tree_node *rb_insert(struct rb_tree *t, char *key)
   return n;
 }
 
-struct rb_tree_node *rb_lookup(struct rb_tree *t, char *key)
+struct rb_tree_node *rb_lookup(struct rb_tree *t, void *key)
 {
   int cmp;
   struct rb_tree_node *n = t->root;
   while (n) {
-    cmp = strcmp(n->key, key);
+    cmp = t->compare(n->key, key);
     if (cmp > 0) n = n->left;
     else if (cmp < 0) n = n->right;
     else return n;
@@ -198,12 +201,12 @@ struct rb_tree_node *rb_next(struct rb_tree_node *n)
   return next;
 }
 
-int rb_contains(struct rb_tree *t, char *key)
+int rb_contains(struct rb_tree *t, void *key)
 {
   return rb_lookup(t, key) != NULL;
 }
 
-void *rb_put(struct rb_tree *t, char *key, void *value)
+void *rb_put(struct rb_tree *t, void *key, void *value)
 {
   struct rb_tree_node *n = rb_insert(t, key);
   void *old_value = n->value;
@@ -211,7 +214,7 @@ void *rb_put(struct rb_tree *t, char *key, void *value)
   return old_value;
 }
 
-void *rb_get(struct rb_tree *t, char *key)
+void *rb_get(struct rb_tree *t, void *key)
 {
   struct rb_tree_node *n = rb_lookup(t, key);
   if (n) return n->value;

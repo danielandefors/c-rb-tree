@@ -1,5 +1,6 @@
 
 #include <stdio.h>
+#include <string.h>
 #include "rb_tree.h"
 
 void dump(struct rb_tree *t)
@@ -12,7 +13,7 @@ void dump(struct rb_tree *t)
 
 int main(const int argc, const char **argv)
 {
-  struct rb_tree *t = rb_create();
+  struct rb_tree *t = rb_create((int (*)(const void*, const void*)) &strcmp);
 
   rb_put(t, "1", "Hello");
   rb_put(t, "2", "World");
